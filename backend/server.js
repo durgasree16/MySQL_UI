@@ -34,16 +34,17 @@ app.post('/describe', async (req, res) => {
   const { table } = req.body;
   try {
     const [desc] = await connection.query(`DESCRIBE \`${table}\``);
-    res.json(desc);
+    res.json(desc.map(col => col.Field));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-app.post('/getData', async (req, res) => {
-  const { table } = req.body;
+app.post('/getSelectedColumnsData', async (req, res) => {
+  const { table, columns } = req.body;
   try {
-    const [rows] = await connection.query(`SELECT * FROM \`${table}\` LIMIT 100`);
+    const colList = columns.map(col => `\`${col}\``).join(', ');
+    const [rows] = await connection.query(`SELECT ${colList} FROM \`${table}\` LIMIT 100`);
     res.json(rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
